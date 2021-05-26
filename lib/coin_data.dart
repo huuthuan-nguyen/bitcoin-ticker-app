@@ -1,8 +1,8 @@
 import 'package:bitcoin_ticker_app/networking.dart';
 
-const apiKey = "";
-const coinAPIDomain = "";
-const coinAPIPath = "";
+const apiKey = "AACBF7DF-5209-4B66-AAA9-003AE0D8124D";
+const coinAPIDomain = "rest.coinapi.io";
+const coinAPIPath = "/v1/exchangerate/BTC/USD";
 
 const List<String> currenciesList = [
   "AUD",
@@ -37,12 +37,13 @@ const List<String> cryptoList = [
 class CoinData {
   Future<dynamic> getCoinData() async {
     Uri uri = Uri.https(coinAPIDomain, coinAPIPath, {
-      "appid": apiKey,
+      "apikey": apiKey,
     });
     NetworkHelper networkHelper = NetworkHelper(uri: uri);
 
     var coinData = await networkHelper.getData();
 
-    return coinData;
+    double lastRice = coinData["rate"];
+    return lastRice;
   }
 }
