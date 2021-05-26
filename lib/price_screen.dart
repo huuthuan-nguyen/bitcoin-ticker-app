@@ -1,4 +1,5 @@
 import 'package:bitcoin_ticker_app/coin_data.dart';
+import 'package:bitcoin_ticker_app/crypto_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
@@ -16,7 +17,8 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   String selectedCurrency = "USD";
-  String bitcoinValue = "?";
+  Map<String, String> coinValues = {};
+  bool isWaiting = false;
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (String currency in currenciesList) {
@@ -64,10 +66,14 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   void getData() async {
+    setState(() {
+      isWaiting = true;
+    });
+    Map<String, String> data = await CoinData().getCoinData(selectedCurrency);
     try {
-      double data = await CoinData().getCoinData(selectedCurrency);
       setState(() {
-        bitcoinValue = data.toStringAsFixed(0);
+        isWaiting = false;
+        coinValues = data;
       });
     } catch (e) {
       print(e);
@@ -84,29 +90,25 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 18, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              CryptoCard(
+                value: (isWaiting ? "?" : coinValues["BTC"]) ?? "?",
+                selectedCurrency: selectedCurrency,
+                cryptoCurrency: "BTC",
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 28,
-                ),
-                child: Text(
-                  "1 BTC = $bitcoinValue $selectedCurrency",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
+              CryptoCard(
+                value: (isWaiting ? "?" : coinValues["ETH"]) ?? "?",
+                selectedCurrency: selectedCurrency,
+                cryptoCurrency: "ETH",
               ),
-            ),
+              CryptoCard(
+                value: (isWaiting ? "?" : coinValues["LTC"]) ?? "?",
+                selectedCurrency: selectedCurrency,
+                cryptoCurrency: "LTC",
+              ),
+            ],
           ),
           Container(
             child: getPicker(),
@@ -114,7 +116,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30),
             color: Colors.lightBlue,
-          )
+          ),
         ],
       ),
     );
